@@ -2,16 +2,16 @@ import Link from "next/link";
 import { MobileNav } from "./Sidebar";
 import Search from "./Search";
 import ThemeToggle from "./ThemeToggle";
-import { getChapters, getSearchIndex } from "@/lib/content";
+import { getGroups, getSearchIndex } from "@/lib/content";
 
 export default function Header() {
-  const chapters = getChapters();
+  const groups = getGroups();
   const docs = getSearchIndex();
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-[100rem] items-center gap-3 px-4 sm:px-6">
-        <MobileNav chapters={chapters} />
+        <MobileNav groups={groups} />
 
         <Link href="/" className="flex items-center gap-2.5 font-semibold">
           <span className="grid size-9 place-items-center rounded-xl border border-sky-400/30 bg-sky-500/15 text-lg">

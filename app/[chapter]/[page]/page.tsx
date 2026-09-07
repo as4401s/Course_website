@@ -10,6 +10,7 @@ import {
   extractHeadings,
   getChapter,
   getChapters,
+  getGroupOfChapter,
   getPage,
   getSiblings,
 } from "@/lib/content";
@@ -36,6 +37,7 @@ export default async function NotePage({ params }: Props) {
   const page = getPage(chapterSlug, pageSlug);
   if (!chapter || !page) notFound();
 
+  const group = getGroupOfChapter(chapterSlug);
   const { prev, next } = getSiblings(chapterSlug, pageSlug);
   const headings = extractHeadings(page.content);
   const a = accent(chapter.accent);
@@ -45,6 +47,15 @@ export default async function NotePage({ params }: Props) {
       <article className="min-w-0 flex-1">
         <Breadcrumbs
           trail={[
+            ...(group
+              ? [
+                  {
+                    label: group.title,
+                    href: `/#group-${group.slug}`,
+                    icon: group.icon,
+                  },
+                ]
+              : []),
             { label: chapter.title, href: chapter.href, icon: chapter.icon },
             { label: page.title },
           ]}

@@ -34,6 +34,7 @@ public/
   "title": "Databases",
   "icon": "🗄️",
   "description": "One-line blurb shown on the homepage card.",
+  "group": "data",
   "order": 1,
   "accent": "sky",
   "status": "active"
@@ -45,7 +46,8 @@ public/
 | `title` | Display name in nav / cards |
 | `icon` | Emoji shown everywhere for this chapter |
 | `description` | One sentence, used on homepage card + chapter header |
-| `order` | Sort order on homepage & sidebar (lower first) |
+| `group` | Slug of a group in `content/_groups.json` (see above) |
+| `order` | Sort order **within its group** (lower first) |
 | `accent` | Colour key: `sky` `violet` `emerald` `amber` `rose` `orange` `cyan` `indigo` `lime` `fuchsia` |
 | `status` | `active` (has content) or `planned` (renders a "Coming soon" card) |
 
@@ -136,23 +138,33 @@ Requires `cwebp` → `brew install webp`.
 
 ## 4. Site structure / features (already built, don't rebuild)
 
-- `/` — homepage: hero + grid of chapter cards (icon, blurb, page count).
-- `/<chapter>` — chapter index: header + list of its pages, numbered.
-- `/<chapter>/<page>` — the page: breadcrumbs, on-this-page TOC, prev/next, back links.
-- **Sidebar** — every chapter and page, always visible on desktop, drawer on mobile.
-- **Search** — `Cmd/Ctrl + K` fuzzy search over all chapter/page titles + descriptions.
+- `/` — homepage: hero + **one section per group**, each with its chapter cards.
+  Sections are anchored: `/#group-<slug>`.
+- `/<chapter>` — chapter index: group label, header, numbered list of its pages.
+- `/<chapter>/<page>` — the page: breadcrumbs (Group → Chapter → Page),
+  on-this-page TOC, prev/next, back links.
+- **Sidebar** — grouped: group heading → chapters → pages. Always visible on
+  desktop, drawer on mobile.
+- **Search** — `Cmd/Ctrl + K` fuzzy search over group, chapter and page titles +
+  descriptions. Planned chapters are excluded (nothing to open).
 - **Theme** — dark by default, light toggle in the header, remembered in localStorage.
+- **Planned chapters** render as dimmed "Coming soon" cards with roadmap chips,
+  and are un-clickable in the nav.
 - Fully responsive; keyboard accessible; back/forward safe (plain links, no SPA traps).
 
 ### Code map
 | path | role |
 |---|---|
-| `lib/content.ts` | Reads `content/`, parses frontmatter, builds chapter/page tree. **Single source of truth.** |
+| `lib/content.ts` | Reads `content/`, parses frontmatter, builds the group → chapter → page tree. **Single source of truth.** |
 | `lib/accents.ts` | The `accent` colour keys → Tailwind classes. |
-| `app/page.tsx` | Homepage. |
+| `app/page.tsx` | Homepage (grouped sections). |
 | `app/[chapter]/page.tsx` | Chapter index. |
 | `app/[chapter]/[page]/page.tsx` | Markdown page renderer. |
-| `components/` | `Sidebar`, `Search`, `ThemeToggle`, `Markdown`, `TOC`, `PageNav`, `ChapterCard`. |
+| `components/` | `Sidebar` (`NavRail` + `MobileNav`), `Search`, `ThemeToggle`, `Markdown`, `Zoomable`, `CodeBlock`, `TOC`, `PageNav`, `Breadcrumbs`, `ChapterCard`, `Header`. |
+
+Key exports of `lib/content.ts`: `getGroups()`, `getChapters()`, `getChapter()`,
+`getPage()`, `getSiblings()`, `getGroupOfChapter()`, `getAllPagesInOrder()`,
+`getSearchIndex()`, `extractHeadings()`.
 
 ---
 
@@ -163,16 +175,30 @@ Requires `cwebp` → `brew install webp`.
 2. Write it in the house style (§2).
 3. Done — nav, search and prev/next update themselves.
 
-**Add a new chapter**
-1. `mkdir content/<slug>` (lowercase-kebab, becomes the URL).
-2. Add `_meta.json` (§1) with the next free `order` and an unused `accent`.
-3. Add `01-....md` as the first page.
-4. Flip `"status"` from `planned` to `active` once it has a page.
-5. Images: original → `assets/<slug>/`, then convert into `public/images/<slug>/` (§3).
+**Start writing a chapter that's already stubbed** (the common case)
+1. Add `content/<chapter>/01-....md`.
+2. Set `"status": "active"` in that chapter's `_meta.json`.
+3. Done — it stops being a "Coming soon" card and becomes clickable.
 
-**Chapters already stubbed as `planned`:** aws, gcp, kubernetes, git-gitlab,
-diffusion-models. Each has an `_meta.json` with a `roadmap`. To start one, just
-add its first `.md` and set `"status": "active"`.
+**Add a brand-new chapter**
+1. `mkdir content/<slug>` (lowercase-kebab, becomes the URL).
+2. Add `_meta.json` (§1): pick its `group`, the next free `order` *within that
+   group*, and an `accent` not already used in that group.
+3. Add `01-....md` as the first page, and set `"status": "active"`.
+4. Images: original → `assets/<slug>/`, then convert into `public/images/<slug>/` (§3).
+
+**Add a new group**
+1. Append an entry to `content/_groups.json` (slug, title, icon, description,
+   order, accent).
+2. Point chapters at it with `"group": "<slug>"`.
+3. Empty groups are hidden, so the group appears as soon as a chapter joins it.
+
+**Re-file a chapter into a different group**
+Change one line — `"group"` in its `_meta.json`. URLs are unaffected.
+
+**Chapters currently stubbed as `planned`:** aws, gcp, docker, kubernetes,
+git-gitlab, deep-learning, diffusion-models, llms. Each already has a `roadmap`
+in its `_meta.json`.
 
 **Commands**
 ```bash
@@ -195,6 +221,9 @@ Vercel auto-deploys `main`.
 - Keep dependencies minimal; no UI framework beyond Tailwind.
 - No client-side data fetching — everything is static (SSG) so Vercel serves it fast.
 - Chapter slugs and page slugs must stay stable once published (they are URLs).
+  Group slugs are safe to change — they only appear in `/#group-<slug>` anchors.
+- Groups exist to keep the homepage scannable. Aim for **3–6 groups**; if one
+  grows past ~6 chapters, split it rather than letting the list sprawl.
 - If a chapter is not written yet, keep `"status": "planned"` — never write filler content.
 
 ---

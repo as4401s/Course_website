@@ -2,8 +2,15 @@
   "title": "AWS",
   "icon": "☁️",
   "description": "Amazon Web Services — core building blocks, from EC2 and S3 to IAM and networking.",
-  "order": 2,
+  "group": "cloud",
+  "order": 1,
   "accent": "orange",
   "status": "planned",
-  "roadmap": ["Core services", "IAM & security", "EC2 & S3", "VPC basics", "Serverless"]
+  "roadmap": [
+    "Core services",
+    "IAM & security",
+    "EC2 & S3",
+    "VPC basics",
+    "Serverless"
+  ]
 }

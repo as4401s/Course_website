@@ -4,17 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Home, Menu, X, Lock } from "lucide-react";
-import type { Chapter } from "@/lib/content";
+import type { Group } from "@/lib/content";
 import { accent } from "@/lib/accents";
 
 /* ------------------------------------------------------------------ *
  *  The nav tree itself — shared by the desktop rail and mobile drawer
  * ------------------------------------------------------------------ */
 function NavTree({
-  chapters,
+  groups,
   onNavigate,
 }: {
-  chapters: Chapter[];
+  groups: Group[];
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -34,69 +34,78 @@ function NavTree({
         Home
       </Link>
 
-      {chapters.map((chapter) => {
-        const a = accent(chapter.accent);
-        const inChapter = pathname.startsWith(`${chapter.href}/`) || pathname === chapter.href;
-        const planned = chapter.status === "planned" || chapter.pages.length === 0;
+      {groups.map((group) => (
+        <section key={group.slug} className="mt-5">
+          <h3 className="flex items-center gap-2 px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted">
+            <span className="text-sm leading-none">{group.icon}</span>
+            {group.title}
+          </h3>
 
-        return (
-          <div key={chapter.slug} className="mt-2">
-            {planned ? (
-              <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-muted/70">
-                <span className="text-base leading-none">{chapter.icon}</span>
-                <span className="flex-1 truncate">{chapter.title}</span>
-                <Lock className="size-3" aria-label="Not written yet" />
+          {group.chapters.map((chapter) => {
+            const a = accent(chapter.accent);
+            const planned =
+              chapter.status === "planned" || chapter.pages.length === 0;
+
+            return (
+              <div key={chapter.slug} className="mt-0.5">
+                {planned ? (
+                  <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-muted/70">
+                    <span className="text-base leading-none">{chapter.icon}</span>
+                    <span className="flex-1 truncate">{chapter.title}</span>
+                    <Lock className="size-3" aria-label="Not written yet" />
+                  </div>
+                ) : (
+                  <Link
+                    href={chapter.href}
+                    onClick={onNavigate}
+                    className={`flex items-center gap-2.5 rounded-lg px-3 py-2 font-medium transition ${
+                      pathname === chapter.href
+                        ? `bg-sky-500/12 ${a.text}`
+                        : "text-fg hover:bg-sky-500/8"
+                    }`}
+                  >
+                    <span className="text-base leading-none">{chapter.icon}</span>
+                    <span className="flex-1 truncate">{chapter.title}</span>
+                    <span className="rounded-full bg-slate-500/15 px-1.5 py-0.5 text-[10px] tabular-nums text-muted">
+                      {chapter.pages.length}
+                    </span>
+                  </Link>
+                )}
+
+                {chapter.pages.length > 0 && (
+                  <ul className="ml-4 mt-1 space-y-0.5 border-l border-line pl-2">
+                    {chapter.pages.map((page) => {
+                      const current = pathname === page.href;
+                      return (
+                        <li key={page.slug}>
+                          <Link
+                            href={page.href}
+                            onClick={onNavigate}
+                            className={`group flex items-start gap-2 rounded-md px-2.5 py-1.5 transition ${
+                              current
+                                ? `bg-sky-500/10 font-medium ${a.text}`
+                                : "text-muted hover:bg-sky-500/8 hover:text-fg"
+                            }`}
+                          >
+                            <span
+                              className={`mt-1.5 size-1.5 shrink-0 rounded-full transition ${
+                                current
+                                  ? a.dot
+                                  : "bg-slate-500/40 group-hover:bg-slate-400"
+                              }`}
+                            />
+                            <span className="leading-snug">{page.title}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
-            ) : (
-              <Link
-                href={chapter.href}
-                onClick={onNavigate}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 font-medium transition ${
-                  pathname === chapter.href
-                    ? `bg-sky-500/12 ${a.text}`
-                    : "text-fg hover:bg-sky-500/8"
-                }`}
-              >
-                <span className="text-base leading-none">{chapter.icon}</span>
-                <span className="flex-1 truncate">{chapter.title}</span>
-                <span className="rounded-full bg-slate-500/15 px-1.5 py-0.5 text-[10px] tabular-nums text-muted">
-                  {chapter.pages.length}
-                </span>
-              </Link>
-            )}
-
-            {chapter.pages.length > 0 && (
-              <ul className="ml-4 mt-1 space-y-0.5 border-l border-line pl-2">
-                {chapter.pages.map((page) => {
-                  const current = pathname === page.href;
-                  return (
-                    <li key={page.slug}>
-                      <Link
-                        href={page.href}
-                        onClick={onNavigate}
-                        className={`group flex items-start gap-2 rounded-md px-2.5 py-1.5 transition ${
-                          current
-                            ? `bg-sky-500/10 font-medium ${a.text}`
-                            : "text-muted hover:bg-sky-500/8 hover:text-fg"
-                        }`}
-                      >
-                        <span
-                          className={`mt-1.5 size-1.5 shrink-0 rounded-full transition ${
-                            current
-                              ? a.dot
-                              : `bg-slate-500/40 ${inChapter ? "group-hover:bg-slate-400" : "group-hover:bg-slate-400"}`
-                          }`}
-                        />
-                        <span className="leading-snug">{page.title}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-        );
-      })}
+            );
+          })}
+        </section>
+      ))}
     </nav>
   );
 }
@@ -104,13 +113,10 @@ function NavTree({
 /* ------------------------------------------------------------------ *
  *  Desktop rail — sticky, always visible from lg up
  * ------------------------------------------------------------------ */
-export function NavRail({ chapters }: { chapters: Chapter[] }) {
+export function NavRail({ groups }: { groups: Group[] }) {
   return (
-    <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 overflow-y-auto border-r border-line px-3 py-6 lg:block">
-      <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
-        Chapters
-      </p>
-      <NavTree chapters={chapters} />
+    <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 overflow-y-auto border-r border-line px-3 py-5 lg:block">
+      <NavTree groups={groups} />
     </aside>
   );
 }
@@ -118,7 +124,7 @@ export function NavRail({ chapters }: { chapters: Chapter[] }) {
 /* ------------------------------------------------------------------ *
  *  Mobile drawer — trigger lives in the header
  * ------------------------------------------------------------------ */
-export function MobileNav({ chapters }: { chapters: Chapter[] }) {
+export function MobileNav({ groups }: { groups: Group[] }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -175,7 +181,7 @@ export function MobileNav({ chapters }: { chapters: Chapter[] }) {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-4">
-              <NavTree chapters={chapters} onNavigate={() => setOpen(false)} />
+              <NavTree groups={groups} onNavigate={() => setOpen(false)} />
             </div>
           </div>
         </div>

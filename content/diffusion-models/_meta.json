@@ -2,8 +2,15 @@
   "title": "Diffusion Models",
   "icon": "🎨",
   "description": "How image generation works — adding noise, learning to remove it, and steering the result.",
-  "order": 6,
+  "group": "ai",
+  "order": 2,
   "accent": "fuchsia",
   "status": "planned",
-  "roadmap": ["The core idea", "Forward & reverse process", "U-Net & attention", "Latent diffusion", "Conditioning & guidance"]
+  "roadmap": [
+    "The core idea",
+    "Forward & reverse process",
+    "U-Net & attention",
+    "Latent diffusion",
+    "Conditioning & guidance"
+  ]
 }

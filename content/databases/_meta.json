@@ -2,6 +2,7 @@
   "title": "Databases",
   "icon": "🗄️",
   "description": "What a database actually is, the main types, what people use in 2026, and what's happening inside the engine.",
+  "group": "data",
   "order": 1,
   "accent": "sky",
   "status": "active"

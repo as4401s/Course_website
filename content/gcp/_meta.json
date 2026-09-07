@@ -2,8 +2,15 @@
   "title": "GCP",
   "icon": "🌎",
   "description": "Google Cloud Platform — projects, compute, storage and the data/ML stack.",
-  "order": 3,
+  "group": "cloud",
+  "order": 2,
   "accent": "cyan",
   "status": "planned",
-  "roadmap": ["Projects & IAM", "Compute Engine", "Cloud Storage", "BigQuery", "Vertex AI"]
+  "roadmap": [
+    "Projects & IAM",
+    "Compute Engine",
+    "Cloud Storage",
+    "BigQuery",
+    "Vertex AI"
+  ]
 }

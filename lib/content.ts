@@ -9,11 +9,30 @@ export type ChapterMeta = {
   title: string;
   icon: string;
   description: string;
+  /** Slug of the group in content/_groups.json this chapter belongs to. */
+  group: string;
+  /** Sort order *within* the group. */
   order: number;
   accent: string;
   status: "active" | "planned";
   /** Optional list of planned page titles, shown on "planned" chapters. */
   roadmap?: string[];
+};
+
+export type GroupMeta = {
+  slug: string;
+  title: string;
+  icon: string;
+  description: string;
+  order: number;
+  accent: string;
+};
+
+export type Group = GroupMeta & {
+  chapters: Chapter[];
+  /** Chapters that actually have pages. */
+  activeChapters: Chapter[];
+  pageCount: number;
 };
 
 export type Page = {
@@ -34,10 +53,21 @@ export type Chapter = ChapterMeta & {
   pages: Page[];
 };
 
+/** Fallback bucket so a chapter with a missing/unknown group never disappears. */
+const UNGROUPED: GroupMeta = {
+  slug: "other",
+  title: "Other",
+  icon: "📦",
+  description: "Not filed under a group yet.",
+  order: 9999,
+  accent: "rose",
+};
+
 const DEFAULT_META: ChapterMeta = {
   title: "Untitled",
   icon: "📘",
   description: "",
+  group: UNGROUPED.slug,
   order: 999,
   accent: "sky",
   status: "active",
@@ -124,6 +154,70 @@ export function getChapter(slug: string): Chapter | undefined {
   return getChapters().find((c) => c.slug === slug);
 }
 
+/* ------------------------------------------------------------------ *
+ *  Groups — a logical layer over chapters (no effect on URLs)
+ * ------------------------------------------------------------------ */
+
+function readGroupMeta(): GroupMeta[] {
+  const file = path.join(CONTENT_DIR, "_groups.json");
+  if (!fs.existsSync(file)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as GroupMeta[];
+    return parsed.sort((a, b) => a.order - b.order);
+  } catch {
+    console.warn("[content] could not parse content/_groups.json");
+    return [];
+  }
+}
+
+let groupCache: Group[] | null = null;
+
+/** Groups in order, each carrying its chapters. Empty groups are dropped. */
+export function getGroups(): Group[] {
+  if (groupCache) return groupCache;
+
+  const chapters = getChapters();
+  const metas = readGroupMeta();
+  const known = new Set(metas.map((g) => g.slug));
+
+  // Any chapter pointing at a group that isn't defined falls into "Other".
+  const needsFallback = chapters.some((c) => !known.has(c.group));
+  const all = needsFallback ? [...metas, UNGROUPED] : metas;
+
+  const groups = all
+    .map((meta) => {
+      const mine = chapters.filter((c) =>
+        meta.slug === UNGROUPED.slug ? !known.has(c.group) : c.group === meta.slug,
+      );
+      const activeChapters = mine.filter(
+        (c) => c.status !== "planned" && c.pages.length > 0,
+      );
+      return {
+        ...meta,
+        chapters: mine,
+        activeChapters,
+        pageCount: mine.reduce((n, c) => n + c.pages.length, 0),
+      } satisfies Group;
+    })
+    .filter((g) => g.chapters.length > 0);
+
+  return (groupCache = groups);
+}
+
+/** The group a chapter belongs to, for breadcrumbs and headers. */
+export function getGroupOfChapter(chapterSlug: string): Group | undefined {
+  return getGroups().find((g) => g.chapters.some((c) => c.slug === chapterSlug));
+}
+
+/** Every page in reading order: group -> chapter -> page. */
+export function getAllPagesInOrder() {
+  return getGroups().flatMap((group) =>
+    group.chapters.flatMap((chapter) =>
+      chapter.pages.map((page) => ({ page, chapter, group })),
+    ),
+  );
+}
+
 export function getPage(chapterSlug: string, pageSlug: string): Page | undefined {
   return getChapter(chapterSlug)?.pages.find((p) => p.slug === pageSlug);
 }
@@ -143,6 +237,7 @@ export type SearchDoc = {
   href: string;
   chapter: string;
   chapterIcon: string;
+  group: string;
   icon: string;
   description: string;
   kind: "chapter" | "page";
@@ -151,26 +246,34 @@ export type SearchDoc = {
 /** Flat index handed to the client-side Cmd+K search. */
 export function getSearchIndex(): SearchDoc[] {
   const docs: SearchDoc[] = [];
-  for (const chapter of getChapters()) {
-    docs.push({
-      title: chapter.title,
-      href: chapter.href,
-      chapter: chapter.title,
-      chapterIcon: chapter.icon,
-      icon: chapter.icon,
-      description: chapter.description,
-      kind: "chapter",
-    });
-    for (const page of chapter.pages) {
+  for (const group of getGroups()) {
+    for (const chapter of group.chapters) {
+      // Planned chapters have no page to open, so they stay out of search.
+      if (chapter.pages.length === 0) continue;
+
       docs.push({
-        title: page.title,
-        href: page.href,
+        title: chapter.title,
+        href: chapter.href,
         chapter: chapter.title,
         chapterIcon: chapter.icon,
-        icon: page.icon,
-        description: page.description,
-        kind: "page",
+        group: group.title,
+        icon: chapter.icon,
+        description: chapter.description,
+        kind: "chapter",
       });
+
+      for (const page of chapter.pages) {
+        docs.push({
+          title: page.title,
+          href: page.href,
+          chapter: chapter.title,
+          chapterIcon: chapter.icon,
+          group: group.title,
+          icon: page.icon,
+          description: page.description,
+          kind: "page",
+        });
+      }
     }
   }
   return docs;

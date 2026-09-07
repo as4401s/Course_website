@@ -2,8 +2,15 @@
   "title": "Git & GitLab",
   "icon": "🔀",
   "description": "Version control that actually makes sense — branching, merging, rebasing, and CI/CD pipelines.",
-  "order": 5,
+  "group": "devops",
+  "order": 3,
   "accent": "amber",
   "status": "planned",
-  "roadmap": ["Git basics", "Branching & merging", "Rebase vs merge", "Merge requests", "GitLab CI/CD"]
+  "roadmap": [
+    "Git basics",
+    "Branching & merging",
+    "Rebase vs merge",
+    "Merge requests",
+    "GitLab CI/CD"
+  ]
 }

@@ -1,0 +1,17 @@
+{
+  "title": "Docker",
+  "icon": "🐳",
+  "description": "Containers from first principles — images, layers, volumes and networking.",
+  "group": "devops",
+  "order": 1,
+  "accent": "lime",
+  "status": "planned",
+  "roadmap": [
+    "Images vs containers",
+    "Writing a Dockerfile",
+    "Layers & caching",
+    "Volumes",
+    "Networking",
+    "Compose"
+  ]
+}

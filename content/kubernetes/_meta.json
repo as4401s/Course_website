@@ -2,8 +2,15 @@
   "title": "Kubernetes",
   "icon": "☸️",
   "description": "Containers at scale — pods, deployments, services, and how the control plane keeps it all running.",
-  "order": 4,
+  "group": "devops",
+  "order": 2,
   "accent": "indigo",
   "status": "planned",
-  "roadmap": ["Architecture", "Pods & Deployments", "Services & Ingress", "ConfigMaps & Secrets", "Helm"]
+  "roadmap": [
+    "Architecture",
+    "Pods & Deployments",
+    "Services & Ingress",
+    "ConfigMaps & Secrets",
+    "Helm"
+  ]
 }

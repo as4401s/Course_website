@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowRight, BookOpen } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { getChapter, getChapters } from "@/lib/content";
+import { getChapter, getChapters, getGroupOfChapter } from "@/lib/content";
 import { accent } from "@/lib/accents";
 
 type Props = { params: Promise<{ chapter: string }> };
@@ -27,11 +27,19 @@ export default async function ChapterPage({ params }: Props) {
   const chapter = getChapter(slug);
   if (!chapter) notFound();
 
+  const group = getGroupOfChapter(slug);
   const a = accent(chapter.accent);
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Breadcrumbs trail={[{ label: chapter.title }]} />
+      <Breadcrumbs
+        trail={[
+          ...(group
+            ? [{ label: group.title, href: `/#group-${group.slug}`, icon: group.icon }]
+            : []),
+          { label: chapter.title },
+        ]}
+      />
 
       {/* chapter header */}
       <header className="relative overflow-hidden rounded-2xl border border-line bg-panel p-6">
@@ -45,7 +53,17 @@ export default async function ChapterPage({ params }: Props) {
             {chapter.icon}
           </span>
           <div className="min-w-0">
-            <h1 className="text-3xl font-bold tracking-tight">{chapter.title}</h1>
+            {group && (
+              <Link
+                href={`/#group-${group.slug}`}
+                className="text-xs font-medium text-muted transition hover:text-fg"
+              >
+                {group.icon} {group.title}
+              </Link>
+            )}
+            <h1 className="mt-1 text-3xl font-bold tracking-tight">
+              {chapter.title}
+            </h1>
             {chapter.description && (
               <p className="mt-1.5 text-sm leading-relaxed text-muted">
                 {chapter.description}

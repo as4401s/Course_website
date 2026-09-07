@@ -3,7 +3,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import ThemeScript from "@/components/ThemeScript";
 import { NavRail } from "@/components/Sidebar";
-import { getChapters } from "@/lib/content";
+import { getGroups } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: {
@@ -45,7 +45,7 @@ export default function RootLayout({
         <Header />
 
         <div className="mx-auto flex max-w-[100rem] px-0 sm:px-6">
-          <NavRail chapters={getChapters()} />
+          <NavRail groups={getGroups()} />
           <main id="main" className="min-w-0 flex-1 px-4 py-8 sm:px-8 sm:py-10">
             {children}
           </main>

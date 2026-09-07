@@ -1,0 +1,34 @@
+[
+  {
+    "slug": "data",
+    "title": "Data & Databases",
+    "icon": "🗄️",
+    "description": "Where data lives, how it's stored and how it's queried.",
+    "order": 1,
+    "accent": "sky"
+  },
+  {
+    "slug": "cloud",
+    "title": "Cloud Platforms",
+    "icon": "☁️",
+    "description": "Running things on someone else's computers.",
+    "order": 2,
+    "accent": "cyan"
+  },
+  {
+    "slug": "devops",
+    "title": "DevOps & Containers",
+    "icon": "⚙️",
+    "description": "Versioning, packaging, shipping and orchestrating code.",
+    "order": 3,
+    "accent": "indigo"
+  },
+  {
+    "slug": "ai",
+    "title": "AI & Deep Learning",
+    "icon": "🤖",
+    "description": "How models learn, generate and reason.",
+    "order": 4,
+    "accent": "fuchsia"
+  }
+]

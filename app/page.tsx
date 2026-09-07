@@ -1,17 +1,14 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Layers, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, FolderTree, Layers, Sparkles } from "lucide-react";
 import ChapterCard from "@/components/ChapterCard";
-import { getChapters, totalPages } from "@/lib/content";
+import { getAllPagesInOrder, getGroups, totalPages } from "@/lib/content";
+import { accent } from "@/lib/accents";
 
 export default function HomePage() {
-  const chapters = getChapters();
-  const active = chapters.filter(
-    (c) => c.status !== "planned" && c.pages.length > 0,
-  );
-  const planned = chapters.filter(
-    (c) => c.status === "planned" || c.pages.length === 0,
-  );
-  const latest = active.flatMap((c) => c.pages.map((p) => ({ page: p, chapter: c })));
+  const groups = getGroups();
+  const allPages = getAllPagesInOrder();
+  const firstPage = allPages[0];
+  const chapterCount = groups.reduce((n, g) => n + g.activeChapters.length, 0);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -35,21 +32,26 @@ export default function HomePage() {
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          {active[0]?.pages[0] && (
+          {firstPage && (
             <Link
-              href={active[0].pages[0].href}
+              href={firstPage.page.href}
               className="group inline-flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-sky-500/25 transition hover:bg-sky-400"
             >
               <BookOpen className="size-4" />
-              Start with {active[0].title}
+              Start with {firstPage.chapter.title}
               <ArrowRight className="size-4 transition group-hover:translate-x-1" />
             </Link>
           )}
-          <span className="inline-flex items-center gap-4 rounded-xl border border-line bg-panel px-4 py-2.5 text-sm text-muted">
+          <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-line bg-panel px-4 py-2.5 text-sm text-muted">
+            <span className="flex items-center gap-1.5">
+              <FolderTree className="size-4" />
+              <strong className="font-semibold text-fg">{groups.length}</strong>{" "}
+              {groups.length === 1 ? "group" : "groups"}
+            </span>
             <span className="flex items-center gap-1.5">
               <Layers className="size-4" />
-              <strong className="font-semibold text-fg">{active.length}</strong>{" "}
-              {active.length === 1 ? "chapter" : "chapters"}
+              <strong className="font-semibold text-fg">{chapterCount}</strong>{" "}
+              {chapterCount === 1 ? "chapter" : "chapters"}
             </span>
             <span className="flex items-center gap-1.5">
               <BookOpen className="size-4" />
@@ -60,26 +62,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------ chapters */}
-      <section>
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-          📚 Chapters
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {active.map((chapter) => (
-            <ChapterCard key={chapter.slug} chapter={chapter} />
-          ))}
-        </div>
-      </section>
+      {/* ---------------------------------------------------- groups */}
+      {groups.map((group) => {
+        const a = accent(group.accent);
+        return (
+          <section key={group.slug} id={`group-${group.slug}`} className="mt-12 scroll-mt-24">
+            <div className="mb-4 flex items-start gap-3">
+              <span
+                className={`grid size-10 shrink-0 place-items-center rounded-xl border text-xl ${a.tile}`}
+              >
+                {group.icon}
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-lg font-semibold leading-tight">
+                  {group.title}
+                </h2>
+                <p className="mt-0.5 text-sm text-muted">
+                  {group.description}
+                  {group.pageCount > 0 && (
+                    <>
+                      {" · "}
+                      <span className="whitespace-nowrap">
+                        {group.pageCount}{" "}
+                        {group.pageCount === 1 ? "page" : "pages"}
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
 
-      {/* -------------------------------------------------- recent pages */}
-      {latest.length > 0 && (
-        <section className="mt-12">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {group.chapters.map((chapter) => (
+                <ChapterCard key={chapter.slug} chapter={chapter} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      {/* -------------------------------------------------- all pages */}
+      {allPages.length > 0 && (
+        <section className="mt-14">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
             🕒 All pages
           </h2>
           <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-panel">
-            {latest.map(({ page, chapter }) => (
+            {allPages.map(({ page, chapter, group }) => (
               <li key={page.href}>
                 <Link
                   href={page.href}
@@ -91,7 +120,8 @@ export default function HomePage() {
                       {page.title}
                     </span>
                     <span className="block truncate text-xs text-muted">
-                      {chapter.icon} {chapter.title}
+                      {group.icon} {group.title} · {chapter.icon}{" "}
+                      {chapter.title}
                       {page.description ? ` · ${page.description}` : ""}
                     </span>
                   </span>
@@ -100,23 +130,6 @@ export default function HomePage() {
               </li>
             ))}
           </ul>
-        </section>
-      )}
-
-      {/* -------------------------------------------------- coming soon */}
-      {planned.length > 0 && (
-        <section className="mt-12">
-          <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold">
-            🧭 On the list
-          </h2>
-          <p className="mb-4 text-sm text-muted">
-            Queued up — these unlock as I write them.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {planned.map((chapter) => (
-              <ChapterCard key={chapter.slug} chapter={chapter} />
-            ))}
-          </div>
         </section>
       )}
     </div>

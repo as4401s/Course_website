@@ -1,0 +1,17 @@
+{
+  "title": "Deep Learning",
+  "icon": "🧬",
+  "description": "Neural networks from the ground up — how they train and why they work.",
+  "group": "ai",
+  "order": 1,
+  "accent": "violet",
+  "status": "planned",
+  "roadmap": [
+    "Neurons & layers",
+    "Backpropagation",
+    "Loss & optimisers",
+    "CNNs",
+    "Transformers",
+    "Training tricks"
+  ]
+}

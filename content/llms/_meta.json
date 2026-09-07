@@ -1,0 +1,17 @@
+{
+  "title": "LLMs",
+  "icon": "💬",
+  "description": "Large language models — tokens, attention, fine-tuning and retrieval.",
+  "group": "ai",
+  "order": 3,
+  "accent": "emerald",
+  "status": "planned",
+  "roadmap": [
+    "Tokenisation",
+    "Attention",
+    "Pretraining vs fine-tuning",
+    "Prompting",
+    "RAG",
+    "Evaluation"
+  ]
+}

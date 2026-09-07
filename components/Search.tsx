@@ -31,8 +31,9 @@ export default function Search({ docs }: { docs: SearchDoc[] }) {
       .map((d) => ({
         doc: d,
         score:
-          fuzzy(query, d.title) * 3 +
+          fuzzy(query, d.title) * 4 +
           fuzzy(query, d.chapter) * 2 +
+          fuzzy(query, d.group) * 2 +
           fuzzy(query, d.description),
       }))
       .filter((r) => r.score > 0)
@@ -142,8 +143,8 @@ export default function Search({ docs }: { docs: SearchDoc[] }) {
                       </span>
                       <span className="block truncate text-xs text-muted">
                         {d.kind === "chapter"
-                          ? "Chapter"
-                          : `${d.chapterIcon} ${d.chapter}`}
+                          ? `Chapter · ${d.group}`
+                          : `${d.chapterIcon} ${d.chapter} · ${d.group}`}
                         {d.description ? ` · ${d.description}` : ""}
                       </span>
                     </span>
