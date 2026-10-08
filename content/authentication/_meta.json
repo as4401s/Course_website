@@ -1,0 +1,9 @@
+{
+  "title": "Authentication",
+  "icon": "🔐",
+  "description": "Who are you, and what may you do? Basic, Digest, API keys, sessions, tokens, JWTs, OAuth 2.0, OIDC, SSO and SAML — explained visually.",
+  "group": "security",
+  "order": 1,
+  "accent": "emerald",
+  "status": "active"
+}

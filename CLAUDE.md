@@ -121,6 +121,12 @@ resolution** (never downscaled) but converted to **WebP** so pages stay fast.
 
 Requires `cwebp` → `brew install webp`.
 
+**SVG diagrams stay SVG.** They are already vector and tiny (the 13 authentication
+diagrams are 7–13 KB each), stay sharp at any zoom, and the script skips them.
+Copy them straight into `public/images/<chapter>/` and reference the `.svg`.
+If an SVG came embedded in another file, keep that original in `assets/<chapter>/`
+(e.g. `assets/authentication/authentication-visual-guide.html`).
+
 > Real numbers: the "Inside DB" diagram went **6.0 MB PNG → 251 KB WebP** at the
 > same 2752×1536 resolution.
 

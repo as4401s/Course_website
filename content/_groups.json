@@ -30,5 +30,13 @@
     "description": "How models learn, generate and reason.",
     "order": 4,
     "accent": "fuchsia"
+  },
+  {
+    "slug": "security",
+    "title": "Security & Identity",
+    "icon": "🛡️",
+    "description": "Who you are, what you may do, and how systems prove it.",
+    "order": 5,
+    "accent": "emerald"
   }
 ]
